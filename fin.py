@@ -1,6 +1,4 @@
-"""Animation de fin - Spé Physique-Chimie (turtle uniquement, aucune dépendance).
-Lancer :  python fin.py
-"""
+
 import math
 import time
 import turtle

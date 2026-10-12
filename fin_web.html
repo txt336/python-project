@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Merci de votre attention !</title>
+<style>
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html, body { margin: 0; background: #0b1020; color: #f5f5f5; font-family: Arial, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; padding: 12px; }
+  #wrap { max-width: 100%; overflow-x: auto; }
+  #canvas-div { width: 900px; height: 600px; }
+  #err { color: #ff8080; white-space: pre-wrap; font-size: 13px; max-width: 900px; }
+  button { margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 0; background: #4da6ff; color: #04101f; font-weight: bold; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="wrap"><div id="canvas-div"></div></div>
+<div id="err"></div>
+<button onclick="location.reload()">Relancer</button>
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script>
+var PY = `
+import math
+import time
+import turtle
+
+BG, TXT = "#0b1020", "#f5f5f5"
+
+screen = turtle.Screen()
+screen.bgcolor(BG)
+screen.tracer(0)
+
+
+def make_pen(color=TXT, size=2):
+    t = turtle.Turtle()
+    t.hideturtle()
+    t.speed(0)
+    t.color(color)
+    t.pensize(size)
+    t.penup()
+    return t
+
+
+def goto(t, x, y):
+    t.penup()
+    t.goto(x, y)
+    t.pendown()
+
+
+def type_text(text, x, y, font, color=TXT, delay=0.06):
+    t = make_pen(color)
+    for i in range(len(text) + 1):
+        t.clear()
+        t.goto(x, y)
+        t.write(text[:i], align="left", font=font)
+        screen.update()
+        time.sleep(delay)
+    return t
+
+
+atom = make_pen("#4da6ff", 2)
+ORBITS = [(0, 1.0, 0.0), (60, 1.4, 2.1), (120, 1.8, 4.2)]
+A, B = 150, 55
+CX, CY = 0, -50
+
+
+def ellipse_point(a, b, tilt, u):
+    x = a * math.cos(u)
+    y = b * math.sin(u)
+    r = math.radians(tilt)
+    return CX + x * math.cos(r) - y * math.sin(r), CY + x * math.sin(r) + y * math.cos(r)
+
+
+def draw_atom(t):
+    atom.clear()
+    atom.color("#4da6ff")
+    for tilt, speed, phase in ORBITS:
+        p = ellipse_point(A, B, tilt, 0)
+        goto(atom, p[0], p[1])
+        for k in range(1, 61):
+            p = ellipse_point(A, B, tilt, 2 * math.pi * k / 60)
+            atom.goto(p[0], p[1])
+        atom.penup()
+    cols = ["#ff4d4d", "#bbbbbb", "#ff4d4d", "#bbbbbb", "#ff4d4d", "#bbbbbb"]
+    for i in range(6):
+        ang = i * math.pi / 3
+        atom.goto(CX + 7 * math.cos(ang), CY + 7 * math.sin(ang))
+        atom.dot(14, cols[i])
+    for tilt, speed, phase in ORBITS:
+        p = ellipse_point(A, B, tilt, speed * t + phase)
+        atom.goto(p[0], p[1])
+        atom.dot(12, "#00e5ff")
+
+
+type_text("Merci de votre attention !", -250, 200, ("Arial", 32, "bold"))
+fin = make_pen("#ffd166")
+
+start = time.time()
+while True:
+    t = time.time() - start
+    draw_atom(t)
+    fin.clear()
+    size = int(40 + 6 * math.sin(t * 3))
+    fin.goto(0, 120 - size // 2)
+    fin.write("FIN", align="center", font=("Arial", size, "bold"))
+    screen.update()
+    time.sleep(0.03)
+`;
+
+Sk.pre = "err";
+Sk.configure({
+  output: function (t) { console.log(t); },
+  __future__: Sk.python3,
+  yieldLimit: 100,
+  execLimit: null
+});
+(Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = "canvas-div";
+Sk.TurtleGraphics.width = 900;
+Sk.TurtleGraphics.height = 600;
+
+Sk.misceval.asyncToPromise(function () {
+  return Sk.importMainWithBody("<stdin>", false, PY, true);
+}).catch(function (e) {
+  document.getElementById("err").textContent = "Erreur : " + e.toString();
+});
+</script>
+</body>
+</html>

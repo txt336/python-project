@@ -1,4 +1,3 @@
-
 import math
 import time
 import turtle
@@ -28,26 +27,6 @@ def goto(t, x, y):
     t.pendown()
 
 
-# ---------- Erlenmeyer (dessiné progressivement) ----------
-def draw_flask():
-    t = make_pen("#7fdbff", 3)
-    pts = [(-315, -20), (-315, -70), (-360, -150), (-240, -150), (-285, -70), (-285, -20)]
-    goto(t, *pts[0])
-    for p in pts[1:]:
-        t.goto(p)
-        screen.update()
-        time.sleep(0.25)
-    t.penup()
-    # liquide
-    t.color("#2ecc71")
-    t.goto(-337.5, -110)
-    t.begin_fill()
-    for p in [(-262.5, -110), (-240, -150), (-360, -150), (-337.5, -110)]:
-        t.goto(p)
-    t.end_fill()
-    screen.update()
-
-
 # ---------- Texte tapé lettre par lettre ----------
 def type_text(text, x, y, font, color=TXT, delay=0.06):
     t = make_pen(color)
@@ -62,10 +41,9 @@ def type_text(text, x, y, font, color=TXT, delay=0.06):
 
 # ---------- Atome (modèle de Bohr) ----------
 atom = make_pen("#4da6ff", 2)
-bubbles = make_pen("#d6f5ff")
 ORBITS = [(0, 1.0, 0.0), (60, 1.4, 2.1), (120, 1.8, 4.2)]  # angle, vitesse, phase
 A, B = 150, 55
-CX, CY = 0, -20
+CX, CY = 0, -50
 
 
 def ellipse_point(a, b, tilt, u):
@@ -98,18 +76,7 @@ def draw_atom(t):
         atom.dot(12, "#00e5ff")
 
 
-def draw_bubbles(t):
-    bubbles.clear()
-    for i, dx in enumerate((-20, 0, 18, -8)):
-        y = -145 + ((t * 25 + i * 11) % 36)
-        bubbles.goto(-300 + dx, y)
-        bubbles.dot(5 + (i % 2) * 2, "#d6f5ff")
-
-
 # ---------- Programme ----------
-draw_flask()
-type_text("E = mc²", 175, -60, ("Arial", 30, "italic"), "#ffd166")
-type_text("H₂O   CO₂   O₂", 150, -110, ("Arial", 18, "normal"), "#a0c4ff", 0.05)
 type_text("Merci de votre attention !", -250, 200, ("Arial", 32, "bold"))
 fin = make_pen("#ffd166")
 
@@ -122,7 +89,6 @@ def frame():
         return
     t = time.time() - start
     draw_atom(t)
-    draw_bubbles(t)
     # "FIN" qui pulse
     fin.clear()
     size = int(40 + 6 * math.sin(t * 3))
